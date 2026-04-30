@@ -1,4 +1,3 @@
-import subprocess
 from modules.instancer import manager
 
 import threading
@@ -30,6 +29,7 @@ class ServerManager:
     readline.set_history_length(100)
 
     def checkup(self):
+        start = time.time()
         while self.run:
             if flags.get('POWEROFF') and flags.get('LETHALTEMP'):
                 log.on_kill("CRITICAL: Got the POWEROFF flag! Emergency shutdown...")
@@ -40,11 +40,10 @@ class ServerManager:
 
             if self.stop:
                 if not flags.get('HIGHTEMP'):
-                    subprocess.run(["java", "-Xmx4G", "-Xms4G", "-jar", "server.jar", "nogui"])
-                    self.stop = False
+                    with open('/home/chlorik/projects/SERVERS/ALIVE/ControlRoom/reboot_flag', 'w', encoding='utf-8') as f:
+                        f.write('full')
 
             
-            start = time.time()
             uptime_seconds = int(time.time() - start)
             self.uptime_str = str(timedelta(seconds=uptime_seconds))
 
@@ -93,13 +92,14 @@ class ServerManager:
         return lists, leftover
 
     def stop_server(self):
-        self.server_cmd.title('@a', '[{"text":"По ","color":"red"},{"text":"какой-то ","color":"#f83a3a"},{"text":"причине ","color":"#f33535"}]', '[{"text":"сервер","color":"#e92b2b"},{"text":"закрывается.","color":"#e42626"}]')
+        self.server_cmd.title('@a', '[{"text":"сервер","color":"#e92b2b"},{"text":"закрывается.","color":"#e42626"}]','[{"text":"удачи!","color":"#f83a3a"}]')
         for speed in [20, 15, 10, 5, 2, 1]:
             self.server_cmd.set_tps(speed)
             time.sleep(1)
 
 
         self.server_cmd.sound('iron_door.close')
+        time.sleep(0.2)
         self.server_cmd.kick('[PRCLRT]-EVERYONE', 'Ваш трудодень завершён. Возвращайтесь завтра.')
         time.sleep(1)
         self.server_cmd.stop()
@@ -114,9 +114,8 @@ class ServerManager:
                 case 'stop':
                     self.stop_server()
                 case 'restart':
-                    typo = input('?> ')
-                    with open('/home/chlorik/projects/SERVERS/ALIVE/ctrl_room/reboot_flag', 'w', encoding='utf-8') as f:
-                        f.write(typo if not None else 'full')
+                    with open('/home/chlorik/projects/SERVERS/ALIVE/ControlRoom/reboot_flag', 'w', encoding='utf-8') as f:
+                        f.write('full')
 
                     self.stop_server()
 
@@ -168,8 +167,7 @@ FLAGS:          HIGHTEMP:   {fmt[flags["HIGHTEMP"]]}  |  HIGHTEMP++: {fmt[flags[
                         self.stop_server()
                     else:
                         if input('Emergency stop?').lower() in ['y', 'yes']:
-                            self.server_cmd.say('Дабы вы смогли нас увидеть в следующий раз, мы вынуждены становить этот сервер.\nПричина: перегрев...\nкабум')
-
+                            self.server_cmd.say('Дабы вы смогли нас увидеть в следующий раз, мы вынуждены становить этот сервер!')
                             self.stop_server()
 
 
@@ -247,3 +245,4 @@ class Cmd:
         result = self.server.command(f'kick {player} {desc}')
         print(result)
         log.info(f'RCON: `kick {player} {desc}`', result)
+

@@ -19,13 +19,11 @@ assert instancer.log is not None
 log = instancer.log
 
 safety_thread = threading.Thread(target=safety.cycle, daemon=True)
-#stats_thread = threading.Thread(target=graph.run_dashboard, daemon=True)
 
 def main():
     log.info("System: Starting ControlRoom...")
     
     safety_thread.start()
-    #stats_thread.start()
     
     try:
         server.start()
