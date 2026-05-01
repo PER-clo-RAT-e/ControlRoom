@@ -113,6 +113,13 @@ class ServerManager:
             match cmd[0]:
                 case 'stop':
                     self.stop_server()
+                
+                case 'update':
+                    with open('/home/chlorik/projects/SERVERS/ALIVE/ControlRoom/update_flag', 'w', encoding='utf-8') as f:
+                        f.write('full')
+
+                    self.stop_server()
+
                 case 'restart':
                     with open('/home/chlorik/projects/SERVERS/ALIVE/ControlRoom/reboot_flag', 'w', encoding='utf-8') as f:
                         f.write('full')
